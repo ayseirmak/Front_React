@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios';
+
 const err = {
   'auth/signin': {
     '401': 'Kullanıcı adı veya şifre yanlış',
@@ -17,18 +18,19 @@ const err = {
     '500': 'Phone Number Error',
   },
   'auth/forgot-password': {
-    '105': 'There is no registered user on this email.',
+    '105': 'There is no registered user on this email.'
   },
   'user/create-new-password': {
-    '400': 'Something is wrong with that token!',
+    '400': 'Something is wrong with that token!'
   },
   'auth/send-email': {
-    '400': 'Bu mail ile uygun bir kullanıcı bulamadık. Lütfen kayıt olunuz.',
+    '400': 'Bu mail ile uygun bir kullanıcı bulamadık. Lütfen kayıt olunuz.'
   },
+  'entry/addTopic': {
+    '110': 'Topic Name is already used!'
+  }
 };
 export const errorInterceptor = (error: AxiosError) => {
-  console.log(error.response.data.message);
-  console.log(error.config.url);
   let errorMessage = null;
   if (error.response?.data.message.toString() === '108') {
     errorMessage = err[error.config.url]['108'];
@@ -40,8 +42,8 @@ export const errorInterceptor = (error: AxiosError) => {
     errorMessage = err[error.config.url]['102'];
   } else if (error.response?.data.message.toString() === '105') {
     errorMessage = err[error.config.url]['105'];
-  } else if (error.response?.data.message.toString() === '108') {
-    errorMessage = err[error.config.url]['108'];
+  } else if (error.response?.data.message.toString() === '110') {
+    errorMessage = err[error.config.url]['110'];
   } else if (error.response?.data.message.toString() === 'User with given email could not found') {
     errorMessage = err['auth/send-email']['400'];
   } else if (error.config.url === 'auth/signin' && error.response?.status === 401) {

@@ -1,16 +1,19 @@
 import {
+  changePasswordAsync,
+  contentAsync,
   forgotpasswordAsync,
+  likeAsync,
   loginAsync,
   logoutAsync,
   registerAsync,
-  changePasswordAsync,
   resetpasswordAsync,
+  topicAsync,
   updateAsync,
   updateLogout
 } from './actions';
 import { all, call, fork, put, takeLatest } from 'redux-saga/effects';
 import { api } from '@internship/shared/api';
-import { removeAccessToken, removeRefreshToken } from '@internship/shared/utils';
+import { removeAccessToken, removeRefreshToken, removeUserName } from '@internship/shared/utils';
 
 function* doLogin({ payload }) {
   try {
@@ -46,6 +49,7 @@ function doUpdateLogout() {
     localStorage.removeItem('cloud_users');
     removeAccessToken();
     removeRefreshToken();
+    removeUserName();
   }
 }
 
@@ -57,6 +61,7 @@ function* doLogout({ payload }) {
       localStorage.removeItem('cloud_users');
       removeAccessToken();
       removeRefreshToken();
+      removeUserName();
     }
   } catch (e) {
     console.error(e);
@@ -74,10 +79,20 @@ function* doRegister({ payload }) {
   }
 }
 
+function* doLike({ payload }) {
+  try {
+    yield call(api.auth.addLike, payload);
+    yield put(likeAsync.success({}));
+  } catch (e) {
+    console.error(e);
+    yield put(likeAsync.failure(e));
+  }
+}
+
 function* doUpdate({ payload }) {
   try {
-   /* let requestData = {};
-    Object.entries(payload).forEach(([key, value]) => (value !== '' ? (requestData = { ...requestData, [key]: value }) : null));*/
+    /* let requestData = {};
+     Object.entries(payload).forEach(([key, value]) => (value !== '' ? (requestData = { ...requestData, [key]: value }) : null));*/
     yield call(api.auth.update, payload);
     yield put(updateAsync.success({}));
   } catch (e) {
@@ -96,12 +111,46 @@ function* doChangePassword({ payload }) {
   }
 }
 
+function* doAddTopic({ payload }) {
+  try {
+    yield call(api.auth.addTopic, payload);
+    yield put(topicAsync.success({}));
+  } catch (e) {
+    console.error(e);
+    yield put(topicAsync.failure(e));
+  }
+}
+
+function* doAddContent({ payload }) {
+  try {
+    yield call(api.auth.addContent, payload);
+    yield put(contentAsync.success({}));
+  } catch (e) {
+    console.error(e);
+    yield put(contentAsync.failure(e));
+  }
+}
+
 function* watchLogin() {
   yield takeLatest(loginAsync.request, doLogin);
 }
+
+function* watchLike() {
+  yield takeLatest(likeAsync.request, doLike);
+}
+
+function* watchAddTopic() {
+  yield takeLatest(topicAsync.request, doAddTopic);
+}
+
+function* watchAddContent() {
+  yield takeLatest(contentAsync.request, doAddContent);
+}
+
 function* watchResetPassword() {
   yield takeLatest(resetpasswordAsync.request, doResetPassword);
 }
+
 function* watchForgotPassword() {
   yield takeLatest(forgotpasswordAsync.request, doForgotPassword);
 }
@@ -132,5 +181,8 @@ export function* authenticationSaga() {
     fork(watchResetPassword),
     fork(watchChangePassword),
     fork(watchUpdateLogout),
+    fork(watchAddTopic),
+    fork(watchAddContent),
+    fork(watchLike)
   ]);
 }

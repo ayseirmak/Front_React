@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { EditProfile, ChangePassword, EditSession } from './profilePageComponents';
+import { ChangePassword, EditProfile, EditSession, MyContents } from './profilePageComponents';
 import { Button, Col, Container, Row } from 'react-bootstrap';
 import { api, UserDetailResponse } from '@internship/shared/api';
-import { ProfileImage } from '@internship/ui';
+import { MyLikes, ProfileImage } from '@internship/ui';
 import { useAuthentication } from '@internship/shared/hooks';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -14,10 +14,15 @@ export const Profile = () => {
   const [inChangePassword, setInChangePassword] = useState(false);
   const [editUserInfo, setEditUserInfo] = useState(false);
   const [sessionInfo, setSessionInfo] = useState(false);
+  const [contentsInfo, setContentsInfo] = useState(false);
+  const [likeInfo, setLikeInfo] = useState(false);
+  const [dislikeInfo, setDislikeInfo] = useState(false);
   const [detail, setDetail] = useState<UserDetailResponse>();
+
   const { isAuthenticated } = useAuthentication();
   const history = useHistory();
   const dispatch = useDispatch();
+
   useEffect(() => {
     api.auth
       .userDetail()
@@ -36,13 +41,40 @@ export const Profile = () => {
     setInEditMode(true);
     setInChangePassword(false);
     setSessionInfo(false);
+    setContentsInfo(false);
     dispatch({ type: '@temp/ERROR_REQUIRED', payload: null });
     dispatch({ type: '@temp/SUCCESS_REQUIRED', payload: null });
   };
 
-
   const editSessionInfo = () => {
     setSessionInfo(true);
+    setDislikeInfo(false);
+    setLikeInfo(false);
+    setInChangePassword(false);
+    setInEditMode(false);
+    setContentsInfo(false);
+  };
+  const editContentsInfo = () => {
+    setContentsInfo(true);
+    setDislikeInfo(false);
+    setLikeInfo(false);
+    setSessionInfo(false);
+    setInChangePassword(false);
+    setInEditMode(false);
+  };
+  const editLikeInfo = () => {
+    setLikeInfo(true);
+    setDislikeInfo(false);
+    setContentsInfo(false);
+    setSessionInfo(false);
+    setInChangePassword(false);
+    setInEditMode(false);
+  };
+  const editDislikeInfo = () => {
+    setDislikeInfo(true);
+    setLikeInfo(false);
+    setContentsInfo(false);
+    setSessionInfo(false);
     setInChangePassword(false);
     setInEditMode(false);
   };
@@ -95,12 +127,24 @@ export const Profile = () => {
                 dispatch({ type: '@temp/ERROR_REQUIRED', payload: null });
                 dispatch({ type: '@temp/SUCCESS_REQUIRED', payload: null });
                 setSessionInfo(false);
+                setDislikeInfo(false);
+                setLikeInfo(false);
+                setContentsInfo(false);
               }}
             >
               Change Password
             </Button>
             <Button className="btn  btn-success mt-2" disabled={sessionInfo} onClick={editSessionInfo}>
               Session Info
+            </Button>
+            <Button className="btn  btn-success mt-2" disabled={contentsInfo} onClick={editContentsInfo}>
+              My Contents
+            </Button>
+            <Button className="btn  btn-success mt-2" disabled={likeInfo} onClick={editLikeInfo}>
+              My Likes
+            </Button>
+            <Button className="btn  btn-success mt-2" disabled={dislikeInfo} onClick={editDislikeInfo}>
+              My Dislikes
             </Button>
           </div>
         </Col>
@@ -143,6 +187,30 @@ export const Profile = () => {
                 <FontAwesomeIcon icon={faTimes} />
               </Button>
               <EditSession />
+            </>
+          ) : null}
+          {contentsInfo ? (
+            <>
+              <Button className="btn btn-danger mb-3" disabled={!contentsInfo} onClick={() => setContentsInfo(false)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </Button>
+              <MyContents />
+            </>
+          ) : null}
+          {likeInfo ? (
+            <>
+              <Button className="btn btn-danger mb-3" disabled={!likeInfo} onClick={() => setLikeInfo(false)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </Button>
+              <MyLikes username={detail?.username} likeOrDislike={true} isGuest={false} />
+            </>
+          ) : null}
+          {dislikeInfo ? (
+            <>
+              <Button className="btn btn-danger mb-3" disabled={!dislikeInfo} onClick={() => setDislikeInfo(false)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </Button>
+              <MyLikes username={detail?.username} likeOrDislike={false} isGuest={false} />
             </>
           ) : null}
         </Col>
